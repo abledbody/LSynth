@@ -55,7 +55,7 @@ waveforms[5] = function(period)
 	return period*2-1
 end
 
---== Noise Waveforms ==--
+--== Noise Variables ==--
 local noiseRateModifier = 2 --Defines how many times the sample value will change in each noise cylce
 local noiseValue = 0
 local noisePeriodOffset = 0
@@ -74,9 +74,13 @@ waveforms[6] = function(period)
 	return noiseValue
 end
 
+--== Custom Variables ==--
+local customSamplesCount = 0
+
 --Custom
 waveforms[7] = function(period,data)
-	return data[1+floor(period*#data)]
+	if period == 0 then customSamplesCount = #data end
+	return data[1+floor(period*customSamplesCount)]
 end
 
 return waveforms
