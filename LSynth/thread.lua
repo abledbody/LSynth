@@ -36,6 +36,7 @@ for i=1, channels do
 	channelStore[i] = {
 		queueableSource = love.audio.newQueueableSource(sampleRate, bitDepth, 2, piecesCount), --Create the queueable source.
 		soundDatas = {}, --The sounddata pieces.
+		currentSoundData = 1, --The index of the sounddata piece to override next.
 	}
 
 	--Create the buffers' sounddata pieces.
