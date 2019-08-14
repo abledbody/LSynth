@@ -75,12 +75,17 @@ waveforms[6] = function(period)
 end
 
 --== Custom Variables ==--
-local customSamplesCount = 0
+local currentData = {}
+local dataSamplesCount = 0
 
 --Custom
 waveforms[7] = function(period,data)
-	if period == 0 then customSamplesCount = #data end
-	return data[1+floor(period*customSamplesCount)]
+	if currentData ~= data then
+		currentData = data --Update the current data
+		dataSamplesCount = #data --Update data samples count
+	end
+
+	return data[1+floor(period*dataSamplesCount)]
 end
 
 return waveforms
