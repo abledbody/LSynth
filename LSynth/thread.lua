@@ -17,6 +17,13 @@ require("love.timer")
 require("love.sound")
 require("love.audio")
 
+--== Localize Lua APIs ==--
+local floor = math.floor
+
+--== Constants ==--
+local pieceSamplesCount = floor((bufferLength*sampleRate)/piecesCount) --The length of buffer pieces in samples.
+local bufferSamplesCount = pieceSamplesCount*piecesCount --The length of the buffer in samples.
+
 --== Variables ==--
 local channelStore = {} --Stores each channel parameters.
 
@@ -24,5 +31,11 @@ local channelStore = {} --Stores each channel parameters.
 for i=1, channels do
 	channelStore[i] = {
 		queueableSource = love.audio.newQueueableSource(sampleRate, bitDepth, 2, piecesCount), --Create the queueable source.
+		soundDatas = {}, --The sounddata pieces.
 	}
+
+	--Create the buffers' sounddata pieces.
+	for j=1, piecesCount do
+		channelStore[i].soundDatas[j] = love.sound.newSoundData(pieceSamplesCount, sampleRate, bitDepth, 2)
+	end
 end
