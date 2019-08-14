@@ -3,6 +3,8 @@
 --TODO: Make sure the parameters explaination is correct after testing them.
 
 --[[
+- path (string): The library require path.
+- dir (string): The directory of the library.
 - channels (number): (unsigned int) The number of channels to have, by default it's 4.
 - sampleRate (number): (unsigned int) The sample rate to operate on, by default it's 44100 on PC, and 22050 on mobile.
 - bitDepth (number): (unsigned int) The bitdepth of the generated samples, by default it's 8 (for fantasy reasons).
@@ -10,7 +12,7 @@
 - piecesCount (number): (unsigned int) The number of pieces to divide the buffer into, affects responsivity, by default it's 4.
 - inChannel (userdata): (love channel) The input channel, recieves data from the main thread.
 ]]
-local channels, sampleRate, bitDepth, bufferLength, piecesCount, inChannel = ...
+local path, dir, channels, sampleRate, bitDepth, bufferLength, piecesCount, inChannel = ...
 
 --Load love modules
 require("love.timer")

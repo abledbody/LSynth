@@ -72,7 +72,7 @@ function LSynth:initialize(channels, sampleRate, bitDepth, bufferLength, piecesC
 	--Load the thread
 	self.thread = love.thread.newThread(dir.."/thread.lua")
 	--Start the thread
-	self.thread:start(self.channels, self.sampleRate, self.bitDepth, self.bufferLength, self.piecesCount, self.outChannel)
+	self.thread:start(path, dir, self.channels, self.sampleRate, self.bitDepth, self.bufferLength, self.piecesCount, self.outChannel)
 
 	self.initialized = true
 end
