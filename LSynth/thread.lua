@@ -19,6 +19,9 @@ require("love.timer")
 require("love.sound")
 require("love.audio")
 
+--== Load sub modules ==--
+local waveforms = require(path..".waveforms")
+
 --== Localize Lua APIs ==--
 local floor = math.floor
 
@@ -45,6 +48,11 @@ for i=0, channels-1 do
 	end
 end
 
+--TODO
+local period = 1
+local freq = 200
+local pstep = 1/(sampleRate/freq)
+
 --== Thread Loop ==--
 while true do
 	for i=0, channels-1 do
@@ -58,6 +66,16 @@ while true do
 			local soundData = soundDatas[currentSoundData]
 			currentSoundData = (currentSoundData+1)%piecesCount
 
+			for k=0, pieceSamplesCount-1 do
+				if period >= 1 then
+					soundData:setSample(k,1,waveforms[0](0))
+					period = period - floor(period)
+				else
+					soundData:setSample(k,1,waveforms[0](period))
+				end
+				period = period + pstep
+			end
+
 			queueableSource:queue(soundData)
 		end
 
@@ -67,5 +85,5 @@ while true do
 		channelStore[i].currentSoundData = currentSoundData
 	end
 
-	love.timer.sleep(0.01)
+	love.timer.sleep(0.0001)
 end
