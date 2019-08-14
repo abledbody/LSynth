@@ -13,6 +13,12 @@ function love.update(dt)
 	LSynth:update(dt)
 end
 
+function love.keypressed(key,isrepeat)
+	if key == "escape" then
+		love.event.quit()
+	end
+end
+
 function love.threaderror(thread, errorstr)
 	error("Thread error ("..tostring(thread).."): "..tostring(errorstr))
 end
