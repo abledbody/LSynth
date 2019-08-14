@@ -20,3 +20,9 @@ require("love.audio")
 --== Variables ==--
 local channelStore = {} --Stores each channel parameters.
 
+--== Initialize ==--
+for i=1, channels do
+	channelStore[i] = {
+		queueableSource = love.audio.newQueueableSource(sampleRate,bitDepth,2,piecesCount), --Create the queueable source.
+	}
+end
