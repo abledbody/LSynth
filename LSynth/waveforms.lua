@@ -20,7 +20,7 @@ Contains custom data for the waveform, used for the custom waveform ONLY.
 ]]
 
 --== Localized Lua APIs ==--
-local sin, random = math.sin, math.random
+local sin, floor, random = math.sin, math.floor, math.random
 
 --== Shared Constants ==--
 local pi, pi2 = math.pi, math.pi*2
@@ -32,12 +32,13 @@ end
 
 --Triangle
 waveforms[1] = function(period)
+	period = period < 0.75 and period+0.25 or period-0.75
 	return period < 0.5 and period*4-1 or 1-(period-0.5)*4
 end
 
 --Half-Rectified Sine
 waveforms[2] = function(period)
-	return period < 0.5 and 0 or sin(period*pi2)
+	return period < 0.5 and sin(period*pi2) or 0
 end
 
 --Square
@@ -52,6 +53,7 @@ end
 
 --Saw
 waveforms[5] = function(period)
+	period = period < 0.5 and period+0.5 or period-0.5
 	return period*2-1
 end
 
