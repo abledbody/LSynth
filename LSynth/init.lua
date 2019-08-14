@@ -27,6 +27,7 @@ LSynth.isMobile = false --Is the chip running on a mobile device ?
 
 LSynth.channels = 4 --Default channels count.
 LSynth.sampleRate = 44100 --Default sample rate (samples per second), 22050 on mobile (if detected).
+LSynth.bitDepth = 8 --Default sample bitdepth, 8 for fantasy reasons, could be either 8 or 16.
 LSynth.bufferLength = 1/60 --Default buffer length (in seconds).
 LSynth.piecesCount = 4 --Default count of buffer pieces (affects responsivity).
 
@@ -39,12 +40,13 @@ LSynth.outChannel = nil --The channel which sends data into the LSynth thread.
 Call before any other method !
 
 Arguments:
-- channels (number/nil): (unsigned int) The number of channels to have.
+- channels (number/nil): (unsigned int) The number of channels to have, by default it's 4.
 - sampleRate (number/nil): (unsigned int) The sample rate to operate on, by default it's 44100 on PC, and 22050 on mobile.
-- bufferLength (number/nil): (unsigned float) The length of the buffer in seconds, by defaults it's 1/60.
+- bitDepth (number): (unsigned int) The bit depth of the generated samples, by default it's 8 (for fantasy reasons).
+- bufferLength (number/nil): (unsigned float) The length of the buffer in seconds, by default it's 1/60.
 - piecesCount (number/nil): (unsigned int) The number of pieces to divide the buffer into, affects responsivity, by default it's 4.
 ]]
-function LSynth:initialize(channels, sampleRate, bufferLength, piecesCount)
+function LSynth:initialize(channels, sampleRate, bitDepth, bufferLength, piecesCount)
 	if self.initialized then error("Already initialized!") end
 
 	--Check if running on mobile, if love.system is available.
@@ -57,6 +59,8 @@ function LSynth:initialize(channels, sampleRate, bufferLength, piecesCount)
 	if channels then self.channels = channels end
 	--Override the sample rate.
 	if sampleRate then self.sampleRate = sampleRate end
+	--Override the bitdepth.
+	if bitDepth then self.bitDepth = bitDepth end
 	--Override the buffer length.
 	if bufferLength then self.bufferLength = bufferLength end
 	--Override the pieces count.
@@ -68,7 +72,7 @@ function LSynth:initialize(channels, sampleRate, bufferLength, piecesCount)
 	--Load the thread
 	self.thread = love.thread.newThread(dir.."/thread.lua")
 	--Start the thread
-	self.thread:start(self.channels ,self.sampleRate, self.bufferLength, self.piecesCount, self.outChannel)
+	self.thread:start(self.channels, self.sampleRate, self.bitDepth, self.bufferLength, self.piecesCount, self.outChannel)
 
 	self.initialized = true
 end
