@@ -50,7 +50,8 @@ end
 
 --TODO
 local period = 1
-local freq = 200
+local freq = 100
+local wv = 0
 local pstep = 1/(sampleRate/freq)
 
 --== Thread Loop ==--
@@ -68,13 +69,19 @@ while true do
 
 			for k=0, pieceSamplesCount-1 do
 				if period >= 1 then
-					soundData:setSample(k,1,waveforms[0](0))
+					soundData:setSample(k,1,waveforms[wv](0))
 					period = period - floor(period)
 				else
-					soundData:setSample(k,1,waveforms[0](period))
+					soundData:setSample(k,1,waveforms[wv](period))
 				end
 				period = period + pstep
 			end
+
+			if currentSoundData == 0 then wv = (wv+1) % 7 end
+
+			--print("Frequency",freq)
+			--freq = freq + 10
+			--pstep = 1/(sampleRate/freq)
 
 			queueableSource:queue(soundData)
 		end
@@ -85,5 +92,5 @@ while true do
 		channelStore[i].currentSoundData = currentSoundData
 	end
 
-	love.timer.sleep(0.0001)
+	love.timer.sleep(1/60)
 end
