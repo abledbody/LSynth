@@ -28,7 +28,7 @@ LSynth.isMobile = false --Is the chip running on a mobile device ?
 LSynth.channels = 4 --Default channels count.
 LSynth.sampleRate = 44100 --Default sample rate (samples per second), 22050 on mobile (if detected).
 LSynth.bitDepth = 8 --Default sample bitdepth, 8 for fantasy reasons, could be either 8 or 16.
-LSynth.bufferLength = 1/60 --Default buffer length (in seconds).
+LSynth.bufferLength = 1/15 --Default buffer length (in seconds).
 LSynth.piecesCount = 4 --Default count of buffer pieces (affects responsivity).
 
 LSynth.thread = nil --The LSynth chip thread.
