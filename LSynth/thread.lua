@@ -8,7 +8,7 @@
 - piecesCount (number): (unsigned int) The number of pieces to divide the buffer into, affects responsivity, by default it's 4.
 - inChannel (userdata): (love channel) The input channel, recieves data from the main thread.
 ]]
-local sampleRate, bufferLength, piecesCount, inChannel = ...
+local channels, sampleRate, bufferLength, piecesCount, inChannel = ...
 
 --Load love modules
 require("love.timer")
