@@ -77,12 +77,6 @@ while true do
 				period = period + pstep
 			end
 
-			if currentSoundData == 0 then wv = (wv+1) % 7 end
-
-			--print("Frequency",freq)
-			--freq = freq + 10
-			--pstep = 1/(sampleRate/freq)
-
 			queueableSource:queue(soundData)
 		end
 
