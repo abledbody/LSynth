@@ -23,7 +23,7 @@ Contains custom data for the waveform, used for the custom waveform ONLY.
 local sin, random = math.sin, math.random
 
 --== Shared Constants ==--
-local pi, pi2 = math.pi, math.pi2
+local pi, pi2 = math.pi, math.pi*2
 
 --Sine
 waveforms[0] = function(period)
@@ -62,7 +62,7 @@ local noisePeriodOffset = 0
 
 --Noise
 waveforms[6] = function(period)
-	if period = 0 then noisePeriodOffset = 0 end --Reset at each new cycle
+	if period == 0 then noisePeriodOffset = 0 end --Reset at each new cycle
 
 	period = period*noiseRateModifier - noisePeriodOffset
 
