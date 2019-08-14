@@ -32,15 +32,40 @@ local channelStore = {} --Stores each channel parameters.
 --== Initialize ==--
 math.randomseed(love.timer.getTime()) --Set the random seed, for the noise generators to work.
 
-for i=1, channels do
+for i=0, channels-1 do
 	channelStore[i] = {
 		queueableSource = love.audio.newQueueableSource(sampleRate, bitDepth, 2, piecesCount), --Create the queueable source.
 		soundDatas = {}, --The sounddata pieces.
-		currentSoundData = 1, --The index of the sounddata piece to override next.
+		currentSoundData = 0, --The index of the sounddata piece to override next.
 	}
 
 	--Create the buffers' sounddata pieces.
-	for j=1, piecesCount do
+	for j=0, piecesCount-1 do
 		channelStore[i].soundDatas[j] = love.sound.newSoundData(pieceSamplesCount, sampleRate, bitDepth, 2)
 	end
+end
+
+--== Thread Loop ==--
+while true do
+	for i=0, channels-1 do
+		--Localize channel data
+		local queueableSource = channelStore[i].queueableSource
+		local soundDatas = channelStore[i].soundDatas
+		local currentSoundData = channelStore[i].currentSoundData
+		
+		--Override played sounddatas
+		for j=1, queueableSource:getFreeBufferCount() do
+			local soundData = soundDatas[currentSoundData]
+			currentSoundData = (currentSoundData+1)%piecesCount
+
+			queueableSource:queue(soundData)
+		end
+
+		queueableSource:play() --Make sure that the queueableSource is playing.
+
+		--Update value
+		channelStore[i].currentSoundData = currentSoundData
+	end
+
+	love.timer.sleep(0.01)
 end
