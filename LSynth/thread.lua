@@ -30,6 +30,8 @@ local bufferSamplesCount = pieceSamplesCount*piecesCount --The length of the buf
 local channelStore = {} --Stores each channel parameters.
 
 --== Initialize ==--
+math.randomseed(love.timer.getTime()) --Set the random seed, for the noise generators to work.
+
 for i=1, channels do
 	channelStore[i] = {
 		queueableSource = love.audio.newQueueableSource(sampleRate, bitDepth, 2, piecesCount), --Create the queueable source.
