@@ -31,13 +31,15 @@ local bufferSamplesCount = pieceSamplesCount*piecesCount --The length of the buf
 
 --== Variables ==--
 local channelStore = {} --Stores each channel parameters.
+local queuelableSources = {} --Stores each channel queueable source, indexed by 1.
 
 --== Initialize ==--
 math.randomseed(love.timer.getTime()) --Set the random seed, for the noise generators to work.
 
 for i=0, channels-1 do
+	queuelableSources[i+1] = love.audio.newQueueableSource(sampleRate, bitDepth, 2, piecesCount) --Create the queueable source.
+
 	channelStore[i] = {
-		queueableSource = love.audio.newQueueableSource(sampleRate, bitDepth, 2, piecesCount), --Create the queueable source.
 		soundDatas = {}, --The sounddata pieces.
 		currentSoundData = 0, --The index of the sounddata piece to override next.
 	}
@@ -58,7 +60,7 @@ local pstep = 1/(sampleRate/freq)
 while true do
 	for i=0, channels-1 do
 		--Localize channel data
-		local queueableSource = channelStore[i].queueableSource
+		local queueableSource = queuelableSources[i+1]
 		local soundDatas = channelStore[i].soundDatas
 		local currentSoundData = channelStore[i].currentSoundData
 		
@@ -86,9 +88,8 @@ while true do
 		channelStore[i].currentSoundData = currentSoundData
 	end
 
-	for i=0, channels-1 do
-		channelStore[i].queueableSource:play() --Make sure that the queueableSource is playing.
-	end
+	--Play all the channels at the same time, and make sure they are synced.
+	love.audio.play(queuelableSources)
 
 	love.timer.sleep(1/60)
 end
