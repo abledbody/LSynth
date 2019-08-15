@@ -70,7 +70,7 @@ while true do
 			for k=0, pieceSamplesCount-1 do
 				if period >= 1 then
 					soundData:setSample(k,1,waveforms[wv](0))
-					period = period - floor(period)
+					period = 0
 				else
 					soundData:setSample(k,1,waveforms[wv](period))
 				end
@@ -84,6 +84,10 @@ while true do
 
 		--Update value
 		channelStore[i].currentSoundData = currentSoundData
+	end
+
+	for i=0, channels-1 do
+		channelStore[i].queueableSource:play() --Make sure that the queueableSource is playing.
 	end
 
 	love.timer.sleep(1/60)
