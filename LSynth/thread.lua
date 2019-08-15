@@ -23,7 +23,7 @@ require("love.audio")
 local waveforms = require(path..".waveforms")
 
 --== Localize Lua APIs ==--
-local floor = math.floor
+local floor, min, max = math.floor, math.min, math.max
 
 --== Constants ==--
 local pieceSamplesCount = floor((bufferLength*sampleRate)/piecesCount) --The length of buffer pieces in samples.
@@ -31,23 +31,16 @@ local bufferSamplesCount = pieceSamplesCount*piecesCount --The length of the buf
 
 --== Variables ==--
 local channelStore = {} --Stores each channel parameters.
-local queuelableSources = {} --Stores each channel queueable source, indexed by 1.
+local soundDatas = {} --The generated soundData pieces.
+local currentSoundData = 0 --The index of the sounddata piece to override next.
+local queueableSource = love.audio.newQueueableSource(sampleRate, bitDepth, 2, piecesCount) --Create the queueable source.
 
 --== Initialize ==--
 math.randomseed(love.timer.getTime()) --Set the random seed, for the noise generators to work.
 
-for i=0, channels-1 do
-	queuelableSources[i+1] = love.audio.newQueueableSource(sampleRate, bitDepth, 2, piecesCount) --Create the queueable source.
-
-	channelStore[i] = {
-		soundDatas = {}, --The sounddata pieces.
-		currentSoundData = 0, --The index of the sounddata piece to override next.
-	}
-
-	--Create the buffers' sounddata pieces.
-	for j=0, piecesCount-1 do
-		channelStore[i].soundDatas[j] = love.sound.newSoundData(pieceSamplesCount, sampleRate, bitDepth, 2)
-	end
+--Create the buffer's sounddata pieces.
+for i=0, piecesCount-1 do
+	soundDatas[i] = love.sound.newSoundData(pieceSamplesCount, sampleRate, bitDepth, 2)
 end
 
 --TODO
@@ -58,38 +51,29 @@ local pstep = 1/(sampleRate/freq)
 
 --== Thread Loop ==--
 while true do
-	for i=0, channels-1 do
-		--Localize channel data
-		local queueableSource = queuelableSources[i+1]
-		local soundDatas = channelStore[i].soundDatas
-		local currentSoundData = channelStore[i].currentSoundData
-		
-		--Override played sounddatas
-		for j=1, queueableSource:getFreeBufferCount() do
-			local soundData = soundDatas[currentSoundData]
-			currentSoundData = (currentSoundData+1)%piecesCount
+	--Override played sounddatas
+	for i=1, queueableSource:getFreeBufferCount() do
+		local soundData = soundDatas[currentSoundData]
+		currentSoundData = (currentSoundData+1)%piecesCount
 
-			for k=0, pieceSamplesCount-1 do
-				if period >= 1 then
-					soundData:setSample(k,1,waveforms[wv](0))
-					period = 0
-				else
-					soundData:setSample(k,1,waveforms[wv](period))
-				end
-				period = period + pstep
+		for j=0, pieceSamplesCount-1 do
+			if period >= 1 then period = 0 end
+
+			local sample = 0
+
+			for k=0,channels-1 do
+				sample = sample + waveforms[wv](period)
 			end
 
-			queueableSource:queue(soundData)
+			soundData:setSample(j,1,max(min(sample,1),-1))
+
+			period = period + pstep
 		end
 
-		queueableSource:play() --Make sure that the queueableSource is playing.
-
-		--Update value
-		channelStore[i].currentSoundData = currentSoundData
+		queueableSource:queue(soundData)
 	end
 
-	--Play all the channels at the same time, and make sure they are synced.
-	love.audio.play(queuelableSources)
+	queueableSource:play() --Make sure that the queueableSource is playing.
 
 	love.timer.sleep(1/60)
 end
