@@ -48,32 +48,39 @@ local period = 1
 local freq = 100
 local wv = 0
 local pstep = 1/(sampleRate/freq)
+local panning = 0 --[-1]: Left, [+1]: Right, [0]: Center
 
 --== Thread Loop ==--
 while true do
 	--Override played sounddatas
 	for i=1, queueableSource:getFreeBufferCount() do
-		local soundData = soundDatas[currentSoundData]
-		currentSoundData = (currentSoundData+1)%piecesCount
+		local soundData = soundDatas[currentSoundData] --The sounddata to override
+		currentSoundData = (currentSoundData+1)%piecesCount --The id of the next sounddata to override
 
+		--Loop for each sample in this sounddata
 		for j=0, pieceSamplesCount-1 do
-			if period >= 1 then period = 0 end
+			if period >= 1 then period = 0 end --Reset the period once it reaches 1
 
-			local sample = 0
+			local sample = 0 --Holds the sum of the all channels
 
 			for k=0,channels-1 do
-				sample = sample + waveforms[wv](period)
+				sample = sample + waveforms[wv](period) --Sum the channel value
 			end
 
-			soundData:setSample(j,1,max(min(sample,1),-1))
+			sample = max(min(sample,1),-1) --Clamp the sum
 
-			period = period + pstep
+			--Set the sample
+			soundData:setSample(j,1,sample*(1-(panning+1)*0.5)) --Left
+			soundData:setSample(j,2,sample*((panning+1)*0.5)) --Right
+
+			period = period + pstep --Increase the period
 		end
 
-		queueableSource:queue(soundData)
+		queueableSource:queue(soundData) --Queue the overridden sounddata
 	end
 
 	queueableSource:play() --Make sure that the queueableSource is playing.
 
-	love.timer.sleep(1/60)
+	--TODO: The sleep time should be dynamic
+	love.timer.sleep(1/60) --Give the CPU some reset
 end
