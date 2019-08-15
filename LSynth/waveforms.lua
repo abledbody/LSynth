@@ -58,22 +58,26 @@ waveforms[5] = function(period)
 end
 
 --== Noise Variables ==--
-local noiseRateModifier = 2 --Defines how many times the sample value will change in each noise cylce
-local noiseValue = 0
-local noisePeriodOffset = 0
+local periodBuffers = {}
+local noiseValues = {}
+
+waveforms.noiseInit = function(channels)
+	for i=0,channels-1 do--DELETEME
+		periodBuffers[i] = 1
+	end
+end
 
 --Noise
-waveforms[6] = function(period)
-	if period == 0 then noisePeriodOffset = 0 end --Reset at each new cycle
+waveforms[6] = function(period, chan)
+	--periodBuffers[chan] = periodBuffers[chan] or 1
 
-	period = period*noiseRateModifier - noisePeriodOffset
-
-	if period >= 0 then
-		noiseValue = random()*2-1 --New random value
-		noisePeriodOffset = noisePeriodOffset+floor(period)+1 --Update the offset
+	if period < periodBuffers[chan] then
+		noiseValues[chan] = random()*2-1 --New random value
 	end
-
-	return noiseValue
+	
+	periodBuffers[chan] = period
+	
+	return noiseValues[chan]
 end
 
 --== Custom Variables ==--

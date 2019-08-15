@@ -37,6 +37,7 @@ local queueableSource = love.audio.newQueueableSource(sampleRate, bitDepth, 2, p
 
 --== Initialize ==--
 math.randomseed(love.timer.getTime()) --Set the random seed, for the noise generators to work.
+waveforms.noiseInit(channels)
 
 --Create the buffer's sounddata pieces.
 for i=0, piecesCount-1 do
@@ -45,8 +46,8 @@ end
 
 --TODO
 local period = 1
-local freq = 100
-local wv = 0
+local freq = 600
+local wv = 6
 local pstep = 1/(sampleRate/freq)
 local panning = 0 --[-1]: Left, [+1]: Right, [0]: Center
 
@@ -59,12 +60,12 @@ while true do
 
 		--Loop for each sample in this sounddata
 		for j=0, pieceSamplesCount-1 do
-			if period >= 1 then period = 0 end --Reset the period once it reaches 1
+			if period >= 1 then period = period - floor(period) end --Reset the period once it reaches 1
 
 			local sample = 0 --Holds the sum of the all channels
 
 			for k=0,channels-1 do
-				sample = sample + waveforms[wv](period) --Sum the channel value
+				sample = sample + waveforms[wv](period, k) --Sum the channel value
 			end
 
 			sample = max(min(sample,1),-1) --Clamp the sum
