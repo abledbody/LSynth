@@ -2,7 +2,7 @@
 local LSynth = require("LSynth")
 
 function love.load()
-	LSynth:initialize(1)
+	LSynth:initialize(4)
 end
 
 function love.draw()
