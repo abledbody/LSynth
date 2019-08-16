@@ -11,8 +11,9 @@
 - bufferLength (number): (unsigned float) The length of the buffer in seconds, by default it's 1/60.
 - piecesCount (number): (unsigned int) The number of pieces to divide the buffer into, affects responsivity, by default it's 4.
 - inChannel (userdata): (love channel) The input channel, recieves data from the main thread.
+- baseAmplitude (number): (unsigned int) The amplitude by which all channels are multiplied.
 ]]
-local path, dir, channels, sampleRate, bitDepth, bufferLength, piecesCount, inChannel = ...
+local path, dir, channels, sampleRate, bitDepth, bufferLength, piecesCount, inChannel, baseAmplitude = ...
 
 --Load love modules
 require("love.timer")
@@ -46,8 +47,8 @@ end
 
 --TODO
 local period = 1
-local freq = 600
-local wv = 6
+local freq = 60
+local wv = 3
 local pstep = 1/(sampleRate/freq)
 local panning = 0 --[-1]: Left, [+1]: Right, [0]: Center
 
@@ -68,7 +69,7 @@ while true do
 				sample = sample + waveforms[wv](period, k) --Sum the channel value
 			end
 
-			sample = max(min(sample,1),-1) --Clamp the sum
+			sample = max(min(sample*baseAmplitude,1),-1) --Apply baseAmplitude and clamp the sum
 
 			--Set the sample
 			soundData:setSample(j,1,sample*(1-(panning+1)*0.5)) --Left

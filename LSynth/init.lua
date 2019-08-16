@@ -34,6 +34,8 @@ LSynth.piecesCount = 4 --Default count of buffer pieces (affects responsivity).
 LSynth.thread = nil --The LSynth chip thread.
 LSynth.outChannel = nil --The channel which sends data into the LSynth thread.
 
+LSynth.baseAmplitude = 0.25 --Default amplitude modifier for all channels.
+
 --==Public Methods==--
 
 --[[ Initialize the LSynth chip.
@@ -46,7 +48,7 @@ Arguments:
 - bufferLength (number/nil): (unsigned float) The length of the buffer in seconds, by default it's 1/60.
 - piecesCount (number/nil): (unsigned int) The number of pieces to divide the buffer into, affects responsivity, by default it's 4.
 ]]
-function LSynth:initialize(channels, sampleRate, bitDepth, bufferLength, piecesCount)
+function LSynth:initialize(channels, sampleRate, bitDepth, bufferLength, piecesCount, baseAmplitude)
 	if self.initialized then error("Already initialized!") end
 
 	--Check if running on mobile, if love.system is available.
@@ -72,7 +74,7 @@ function LSynth:initialize(channels, sampleRate, bitDepth, bufferLength, piecesC
 	--Load the thread
 	self.thread = love.thread.newThread(dir.."/thread.lua")
 	--Start the thread
-	self.thread:start(path, dir, self.channels, self.sampleRate, self.bitDepth, self.bufferLength, self.piecesCount, self.outChannel)
+	self.thread:start(path, dir, self.channels, self.sampleRate, self.bitDepth, self.bufferLength, self.piecesCount, self.outChannel, self.baseAmplitude)
 
 	self.initialized = true
 end

@@ -58,24 +58,23 @@ waveforms[5] = function(period)
 end
 
 --== Noise Variables ==--
-local periodBuffers = {}
-local noiseValues = {}
+local periodBuffers = {} --Used to compare last sample to current sample.
+local noiseValues = {} --Noise needs to be persistent across multiple samples. The values are stored here.
 
 waveforms.noiseInit = function(channels)
-	for i=0,channels-1 do--DELETEME
-		periodBuffers[i] = 1
+	--periodBuffers needs to contain data before waveforms[6] can be called, and there needs to be one periodBuffer per channel.
+	for i=0,channels-1 do
+		periodBuffers[i] = 1 --If a periodBuffer is set to 1 the noise generator is gaurenteed to pick a new value next sample, as period is always less than 1.
 	end
 end
 
 --Noise
 waveforms[6] = function(period, chan)
-	--periodBuffers[chan] = periodBuffers[chan] or 1
-
 	if period < periodBuffers[chan] then
-		noiseValues[chan] = random()*2-1 --New random value
+		noiseValues[chan] = random()*2-1 --Scales between -1 and 1 instead of 0 and 1
 	end
 	
-	periodBuffers[chan] = period
+	periodBuffers[chan] = period --To be used for comparison next sampling.
 	
 	return noiseValues[chan]
 end
