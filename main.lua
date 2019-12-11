@@ -2,7 +2,7 @@
 local LSynth = require("LSynth")
 
 function love.load()
-	LSynth:initialize(4)
+	--LSynth:initialize(1)
 end
 
 function love.draw()
@@ -10,7 +10,13 @@ function love.draw()
 end
 
 function love.update(dt)
-	LSynth:update(dt)
+	if LSynth.initialized then LSynth:update(dt) end
+
+	if love.keyboard.isDown("space") and not LSynth.initialized then
+		LSynth:initialize(1)
+	elseif LSynth.initialized and not love.keyboard.isDown("space") then
+		love.event.quit()
+	end
 end
 
 function love.keypressed(key,isrepeat)
