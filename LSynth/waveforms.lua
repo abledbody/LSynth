@@ -58,7 +58,7 @@ waveforms[5] = function(period)
 end
 
 --== Noise Variables ==--
-local noiseRateModifier = 2 --Defines how many times the sample value will change in each noise cylce
+local noiseRateModifier = 2 --Defines how many times the sample value will change in each noise cycle
 local noiseValue = 0
 local noisePeriodOffset = 0
 
