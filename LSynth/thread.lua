@@ -84,5 +84,5 @@ while true do
 	queueableSource:play() --Make sure that the queueableSource is playing.
 
 	--TODO: The sleep time should be dynamic
-	love.timer.sleep(1/60) --Give the CPU some reset
+	love.timer.sleep(bufferLength/4) --Give the CPU some reset
 end
