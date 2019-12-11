@@ -45,12 +45,43 @@ for i=0, piecesCount-1 do
 	soundDatas[i] = love.sound.newSoundData(pieceSamplesCount, sampleRate, bitDepth, 2)
 end
 
+--Setup the initial channels states
+for i=0, channels-1 do
+	channelStore[i] = {
+		waveform = 3,
+		panning = 0, --[-1]: Left, [+1]: Right, [0]: Center
+		frequency = 100,
+		period = 0,
+		periodStep = 1/(sampleRate/40000)
+	}
+end
+
+--== Parameters Controller ==--
+
+--Return the parameters for the next sample to generate.
+--Parameters: The chunnel ID.
+--Returns: period, waveform, panning.
+local function nextParameters(channelID)
+	local channelData = channelStore[channelID]
+
+	local waveform = channelData.waveform
+	local panning = channelData.panning
+	local period = channelData.period
+
+	local nextPeriod = period + channelData.periodStep
+	if nextPeriod >= 1 then nextPeriod = nextPeriod-1 end --Reset the period once it reaches 1
+	channelData.period = nextPeriod
+
+	return period, waveform, panning
+end
+
 --TODO
-local period = 1
-local freq = 100
-local wv = 0
-local pstep = 1/(sampleRate/freq)
+
+--[[local waveform = 0
 local panning = 0 --[-1]: Left, [+1]: Right, [0]: Center
+local frequency = 100
+local period = 1
+local periodStep = 1/(sampleRate/frequency)]]
 
 --== Thread Loop ==--
 while true do
@@ -61,21 +92,23 @@ while true do
 
 		--Loop for each sample in this sounddata
 		for j=0, pieceSamplesCount-1 do
-			if period >= 1 then period = 0 end --Reset the period once it reaches 1
+			local leftSample, rightSample = 0, 0 --Holds the sum of all the channels for each side
 
-			local sample = 0 --Holds the sum of the all channels
+			for k=0, channels-1 do
+				--Get the parameters
+				local period, waveform, panning = nextParameters(k)
 
-			for k=0,channels-1 do
-				sample = sample + waveforms[wv](period) --Sum the channel value
+				--Sum the channel values
+				leftSample = leftSample + waveforms[waveform](period)*(1-(panning+1)*0.5)
+				rightSample = rightSample + waveforms[waveform](period)*((panning+1)*0.5)
 			end
 
-			sample = max(min(sample,1),-1) --Clamp the sum
+			leftSample = max(min(leftSample,1),-1) --Clamp the sum
+			rightSample = max(min(rightSample,1),-1) --Clamp the sum
 
-			--Set the sample
-			soundData:setSample(j,1,sample*(1-(panning+1)*0.5)) --Left
-			soundData:setSample(j,2,sample*((panning+1)*0.5)) --Right
-
-			period = period + pstep --Increase the period
+			--Set the samples
+			soundData:setSample(j,1,leftSample) --Left
+			soundData:setSample(j,2,rightSample) --Right
 		end
 
 		queueableSource:queue(soundData) --Queue the overridden sounddata
