@@ -48,11 +48,12 @@ end
 --Setup the initial channels states
 for i=0, channels-1 do
 	channelStore[i] = {
-		waveform = 3,
+		waveform = 0,
 		panning = 0, --[-1]: Left, [+1]: Right, [0]: Center
 		frequency = 100,
 		period = 0,
-		periodStep = 1/(sampleRate/40000)
+		periodStep = 1/(sampleRate/400),
+		reset = false
 	}
 end
 
