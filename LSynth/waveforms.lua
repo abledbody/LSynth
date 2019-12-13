@@ -64,7 +64,7 @@ local noisePeriodOffset = 0
 
 --Noise
 waveforms[6] = function(period)
-	if period == 0 then noisePeriodOffset = 0 end --Reset at each new cycle
+	if reset then noisePeriodOffsets[channel] = 0 end --Reset at each new cycle
 
 	period = period*noiseRateModifier - noisePeriodOffset
 

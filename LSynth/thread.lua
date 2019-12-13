@@ -67,12 +67,18 @@ local function nextParameters(channelID)
 	local waveform = channelData.waveform
 	local panning = channelData.panning
 	local period = channelData.period
+	local reset = channelData.reset
+
+	channelData.reset = false
 
 	local nextPeriod = period + channelData.periodStep
-	if nextPeriod >= 1 then nextPeriod = nextPeriod-1 end --Reset the period once it reaches 1
+	if nextPeriod >= 1 then --Reset the period once it reaches 1
+		nextPeriod = nextPeriod-floor(nextPeriod)
+		channelData.reset = true
+	end
 	channelData.period = nextPeriod
 
-	return period, waveform, panning
+	return period, reset, waveform, panning
 end
 
 --== Thread Loop ==--
@@ -88,11 +94,11 @@ while true do
 
 			for k=0, channels-1 do
 				--Get the parameters
-				local period, waveform, panning = nextParameters(k)
+				local period, reset, waveform, panning = nextParameters(k)
 
 				--Sum the channel values
-				leftSample = leftSample + waveforms[waveform](period)*(1-(panning+1)*0.5)
-				rightSample = rightSample + waveforms[waveform](period)*((panning+1)*0.5)
+				leftSample = leftSample + waveforms[waveform](period, reset, k)*(1-(panning+1)*0.5)
+				rightSample = rightSample + waveforms[waveform](period, reset, k)*((panning+1)*0.5)
 			end
 
 			leftSample = max(min(leftSample,1),-1) --Clamp the sum
