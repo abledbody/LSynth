@@ -29,6 +29,11 @@ local sin, floor, random = math.sin, math.floor, math.random
 --== Shared Constants ==--
 local pi, pi2 = math.pi, math.pi*2
 
+--None
+waveforms[-1] = function(period)
+	return 0
+end
+
 --Sine
 waveforms[0] = function(period)
 	return sin(period*pi2)
