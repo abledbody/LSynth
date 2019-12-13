@@ -20,7 +20,7 @@ require("love.sound")
 require("love.audio")
 
 --== Load sub modules ==--
-local waveforms = require(path..".waveforms")
+local waveforms = love.filesystem.load(dir.."/waveforms.lua")(channels)
 
 --== Localize Lua APIs ==--
 local floor, min, max = math.floor, math.min, math.max
@@ -92,7 +92,7 @@ while true do
 		for j=0, pieceSamplesCount-1 do
 			local leftSample, rightSample = 0, 0 --Holds the sum of all the channels for each side
 
-			for k=0, channels-1 do
+			for k=0, channels-1 do --K is the current channel we're generating
 				--Get the parameters
 				local period, reset, waveform, panning = nextParameters(k)
 

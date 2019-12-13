@@ -1,6 +1,8 @@
 --Waveforms samples generators
 local waveforms = {}
 
+local channels = ... --The amount of channels
+
 --[[
 Supported waveforms:
 --------------------
@@ -59,21 +61,27 @@ end
 
 --== Noise Variables ==--
 local noiseRateModifier = 2 --Defines how many times the sample value will change in each noise cycle
-local noiseValue = 0
-local noisePeriodOffset = 0
+
+local noisePeriodOffsets = {}
+local noiseValues = {}
+
+for channel=0, channels-1 do
+	noisePeriodOffsets[channel] = 0
+	noiseValues[channel] = 0
+end
 
 --Noise
-waveforms[6] = function(period)
+waveforms[6] = function(period, reset, channel)
 	if reset then noisePeriodOffsets[channel] = 0 end --Reset at each new cycle
 
-	period = period*noiseRateModifier - noisePeriodOffset
+	period = period*noiseRateModifier - noisePeriodOffsets[channel]
 
 	if period >= 0 then
-		noiseValue = random()*2-1 --New random value
-		noisePeriodOffset = noisePeriodOffset+floor(period)+1 --Update the offset
+		noiseValues[channel] = random()*2-1 --New random value
+		noisePeriodOffsets[channel] = noisePeriodOffsets[channel]+floor(period)+1 --Update the offset
 	end
 
-	return noiseValue
+	return noiseValues[channel]
 end
 
 --== Custom Variables ==--
