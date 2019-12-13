@@ -11,9 +11,8 @@
 - bufferLength (number): (unsigned float) The length of the buffer in seconds, affects responsivity and pops/clicks, by default it's 1/15.
 - piecesCount (number): (unsigned int) The number of pieces to divide the buffer into, affects pops/clicks, by default it's 4.
 - inChannels (array of userdata): (love channels) The input channels, recieves data from the main thread, one for each audio channel.
-- outChannels (array of userdata): (love channels) The output channels, sends data into the main thread, one for each audio channel.
 ]]
-local path, dir, channels, sampleRate, bitDepth, bufferLength, piecesCount, inChannels, outChannels = ...
+local path, dir, channels, sampleRate, bitDepth, bufferLength, piecesCount, inChannels = ...
 
 --Load love modules
 require("love.timer")

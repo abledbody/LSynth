@@ -33,7 +33,6 @@ LSynth.piecesCount = 4 --Default count of buffer pieces (affects responsivity).
 
 LSynth.thread = nil --The LSynth chip thread.
 LSynth.outChannels = {} --The channels which sends data into the LSynth thread, each audio channel has one.
-LSynth.inChannels = {} --The channels which receive data from the LSynth thread, each audio channel has one.
 
 --==Public Methods==--
 
@@ -68,15 +67,12 @@ function LSynth:initialize(channels, sampleRate, bitDepth, bufferLength, piecesC
 	if piecesCount then self.piecesCount = piecesCount end
 	
 	--Create the communication channels
-	for i=0, self.channels do
-		self.outChannels[i] = love.thread.newChannel()
-		self.inChannels[i] = love.thread.newChannel()
-	end
+	for i=0, self.channels do self.outChannels[i] = love.thread.newChannel() end
 
 	--Load the thread
 	self.thread = love.thread.newThread(dir.."/thread.lua")
 	--Start the thread
-	self.thread:start(path, dir, self.channels, self.sampleRate, self.bitDepth, self.bufferLength, self.piecesCount, self.outChannels, self.inChannels)
+	self.thread:start(path, dir, self.channels, self.sampleRate, self.bitDepth, self.bufferLength, self.piecesCount, self.outChannels)
 
 	self.initialized = true
 end
