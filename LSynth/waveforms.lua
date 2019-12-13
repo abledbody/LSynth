@@ -19,6 +19,8 @@ Supported waveforms:
 About Waveform data argument:
 -----------------------------
 Contains custom data for the waveform, used for the custom waveform ONLY.
+
+The dataLength is the count of elements in the data array.
 ]]
 
 --== Localized Lua APIs ==--
@@ -84,18 +86,9 @@ waveforms[6] = function(period, reset, channel)
 	return noiseValues[channel]
 end
 
---== Custom Variables ==--
-local currentData = {}
-local dataSamplesCount = 0
-
 --Custom
-waveforms[7] = function(period,data)
-	if currentData ~= data then
-		currentData = data --Update the current data
-		dataSamplesCount = #data --Update data samples count
-	end
-
-	return data[1+floor(period*dataSamplesCount)]
+waveforms[7] = function(period, reset, channel, data, dataLength)
+	return data[1+floor(period*dataLength)]
 end
 
 return waveforms
