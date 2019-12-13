@@ -96,10 +96,14 @@ while true do
 			for k=0, channels-1 do --K is the current channel we're generating
 				--Get the parameters
 				local period, reset, waveform, panning = nextParameters(k)
+				
+				--Generate the sample
+				local sample = waveforms[waveform](period, reset, k)
 
 				--Sum the channel values
-				leftSample = leftSample + waveforms[waveform](period, reset, k)*(1-(panning+1)*0.5)
-				rightSample = rightSample + waveforms[waveform](period, reset, k)*((panning+1)*0.5)
+				panning = (panning+1)*0.5
+				leftSample = leftSample + sample*(1-panning)
+				rightSample = rightSample + sample*panning
 			end
 
 			leftSample = max(min(leftSample,1),-1) --Clamp the sum
