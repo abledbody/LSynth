@@ -67,7 +67,7 @@ function LSynth:initialize(channels, sampleRate, bitDepth, bufferLength, piecesC
 	if piecesCount then self.piecesCount = piecesCount end
 	
 	--Create the communication channels
-	for i=0, self.channels do self.outChannels[i] = love.thread.newChannel() end
+	for i=0, self.channels-1 do self.outChannels[i] = love.thread.newChannel() end
 
 	--Load the thread
 	self.thread = love.thread.newThread(dir.."/thread.lua")
@@ -75,6 +75,52 @@ function LSynth:initialize(channels, sampleRate, bitDepth, bufferLength, piecesC
 	self.thread:start(path, dir, self.channels, self.sampleRate, self.bitDepth, self.bufferLength, self.piecesCount, self.outChannels)
 
 	self.initialized = true
+end
+
+--Set the waveform of a channel
+function LSynth:setWaveform(channel, waveform)
+	return self.outChannels[channel]:push({"waveform", waveform})
+end
+
+--Set the panning of a channel
+function LSynth:setPanning(channel, panning)
+	return self.outChannels[channel]:push({"panning", panning})
+end
+
+--Set the frequency of a channel
+function LSynth:setFrequency(channel, frequency)
+	return self.outChannels[channel]:push({"frequency", frequency})
+end
+
+--Set the amplitude of a channel
+function LSynth:setAmplitude(channel, amplitude)
+	return self.outChannels[channel]:push({"amplitude", amplitude})
+end
+
+--Enable a channel's output
+function LSynth:enable(channel)
+	return self.outChannels[channel]:push({"enable"})
+end
+
+--Disable a channel's output
+function LSynth:disable(channel)
+	return self.outChannels[channel]:push({"disable"})
+end
+
+--Enable a channel and wait some time before executing the next command
+function LSynth:enableAndWait(channel, time)
+	return self.outChannels[channel]:push({"enableAndWait", time})
+end
+
+--Tell a channel to wait some time before executing the next command
+function LSynth:wait(channel, time)
+	return self.outChannels[channel]:push({"wait", time})
+end
+
+--Interrupt a channel, clears the commands queue and cancels any wait command
+function LSynth:interrupt(channel)
+	self.outChannels[channel]:clear()
+	return self.outChannels[channel]:push({"interrupt"})
 end
 
 --== Hooks ==--

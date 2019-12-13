@@ -48,12 +48,16 @@ end
 --Setup the initial channels states
 for i=0, channels-1 do
 	channelStore[i] = {
-		waveform = 0,
-		panning = 0, --[-1]: Left, [+1]: Right, [0]: Center
-		frequency = 100,
-		period = 0,
-		periodStep = 1/(sampleRate/400),
-		reset = false
+		enabled = false, --Whether the channel is muted or not
+		waveform = 0, --The waveform to generate
+		panning = 0, --The panning of the channel output, [-1]: Left, [+1]: Right, [0]: Center
+		amplitude = 1, --The amplitude of the generated wave
+		frequency = 440, --The frequency of the wave to generate
+		period = 0, --The period of the wave cycle
+		periodStep = 1/(sampleRate/440), --The period step between each sample for the current frequency
+		reset = true, --Whether the period has been reset this sample or not
+
+		wait = false --How many sample to wait before applying further commands
 	}
 end
 
@@ -65,10 +69,59 @@ end
 local function nextParameters(channelID)
 	local channelData = channelStore[channelID]
 
+	local enabled = channelData.enabled
 	local waveform = channelData.waveform
 	local panning = channelData.panning
+	local amplitude = channelData.amplitude
 	local period = channelData.period
 	local reset = channelData.reset
+
+	local inChannel = inChannels[channelID]
+
+	if channelData.wait then
+		local command = inChannel:peek()
+		if command and command[1] == "interrupt" then --Check if there is an interrupt
+			channelData.wait = false
+		else --Decrease the wait time until it reaches 0
+			channelData.wait = channelData.wait - 1
+			if channelData.wait <= 0 then channelData.wait = false end
+		end
+	end
+
+	if not channelData.wait then --Execute further commands
+		local command = inChannel:pop()
+		while command do
+			local action = command[1]
+
+			print("Command", command[1], command[2])
+
+			if action == "enable" then
+				channelData.enabled = true
+			elseif action == "disable" then
+				channelData.enabled = false
+			elseif action == "frequency" then
+				channelData.frequency = command[2]
+				channelData.periodStep = channelData.frequency/sampleRate --1/(sampleRate/channelData.frequency)
+			elseif action == "amplitude" then
+				channelData.amplitude = command[2]
+			elseif action == "waveform" then
+				channelData.waveform = command[2]
+			elseif action == "panning" then
+				channelData.panning = command[2]
+			elseif action == "wait" then
+				channelData.wait = command[2]*sampleRate
+				break
+			elseif action == "enableAndWait" then
+				channelData.enabled = true
+				channelData.wait = command[2]*sampleRate
+				break
+			end
+
+			command = inChannel:pop()
+		end
+	end
+
+	if not enabled then return 0, false, -1, 0, 0 end
 
 	channelData.reset = false
 
@@ -79,7 +132,7 @@ local function nextParameters(channelID)
 	end
 	channelData.period = nextPeriod
 
-	return period, reset, waveform, panning
+	return period, reset, waveform, panning, amplitude
 end
 
 --== Thread Loop ==--
@@ -95,10 +148,10 @@ while true do
 
 			for k=0, channels-1 do --K is the current channel we're generating
 				--Get the parameters
-				local period, reset, waveform, panning = nextParameters(k)
+				local period, reset, waveform, panning, amplitude = nextParameters(k)
 				
 				--Generate the sample
-				local sample = waveforms[waveform](period, reset, k)
+				local sample = waveforms[waveform](period, reset, k)*amplitude
 
 				--Sum the channel values
 				panning = (panning+1)*0.5
