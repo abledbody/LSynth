@@ -2,7 +2,7 @@
 local LSynth = require("LSynth")
 
 function love.load()
-	--LSynth:initialize(1)
+	
 end
 
 function love.draw()
@@ -13,7 +13,7 @@ function love.update(dt)
 	if LSynth.initialized then LSynth:update(dt) end
 
 	if love.keyboard.isDown("space") and not LSynth.initialized then
-		LSynth:initialize(1)
+		LSynth:initialize(2)
 	elseif LSynth.initialized and not love.keyboard.isDown("space") then
 		love.event.quit()
 	end
