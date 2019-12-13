@@ -75,14 +75,6 @@ local function nextParameters(channelID)
 	return period, waveform, panning
 end
 
---TODO
-
---[[local waveform = 0
-local panning = 0 --[-1]: Left, [+1]: Right, [0]: Center
-local frequency = 100
-local period = 1
-local periodStep = 1/(sampleRate/frequency)]]
-
 --== Thread Loop ==--
 while true do
 	--Override played sounddatas
