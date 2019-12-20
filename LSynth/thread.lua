@@ -161,9 +161,10 @@ local function nextParameters(channelID)
 					channelData.amplitudeSlideTarget = false
 				end
 			end
-		else --Clamp the amplitude value just in case
-			nextAmplitude = min(max(0, nextAmplitude), 1)
 		end
+
+		--Clamp the amplitude value just in-case
+		nextAmplitude = min(max(0, nextAmplitude), 1)
 
 		channelData.amplitude = nextAmplitude
 	end
