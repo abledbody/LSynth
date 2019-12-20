@@ -204,6 +204,7 @@ local function nextParameters(channelID)
 		nextFrequency = min(max(0, nextFrequency), 20000)
 
 		channelData.frequency = nextFrequency
+		channelData.periodStep = channelData.frequency/sampleRate
 	end
 
 	--Pariod update--
