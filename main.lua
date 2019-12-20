@@ -18,11 +18,11 @@ function love.update(dt)
 		LSynth:setPanning(0, 0)
 		LSynth:setAmplitude(0, 1)
 		LSynth:setFrequency(0, 200)
+		LSynth:setFrequencySlide(0, 100, 20000)
 		LSynth:setWaveform(0,0)
 		LSynth:enable(0)
 		for i=0, 200 do
 			LSynth:wait(0,0.125)
-			LSynth:setFrequency(0, 250 + i*10)
 			LSynth:setPanning(0, i%3-1)
 		end
 
