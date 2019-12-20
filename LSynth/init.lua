@@ -42,7 +42,7 @@ Call before any other method !
 Arguments:
 - channels (number/nil): (unsigned int) The number of channels to have, by default it's 4.
 - sampleRate (number/nil): (unsigned int) The sample rate to operate on, by default it's 44100 on PC, and 22050 on mobile.
-- bitDepth (number): (unsigned int) The bit depth of the generated samples, by default it's 8 (for fantasy reasons).
+- bitDepth (number/nil): (unsigned int) The bit depth of the generated samples, by default it's 8 (for fantasy reasons).
 - bufferLength (number/nil): (unsigned float) The length of the buffer in seconds, by default it's 1/60.
 - piecesCount (number/nil): (unsigned int) The number of pieces to divide the buffer into, affects responsivity, by default it's 4.
 ]]
