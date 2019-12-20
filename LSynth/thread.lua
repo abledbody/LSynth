@@ -96,6 +96,93 @@ local function nextParameters(channelID)
 
 	local inChannel = inChannels[channelID]
 
+	if enabled then
+		--Panning update--
+
+		if panningSlideRate then
+			local nextPanning = channelData.panning + panningSlideRate
+
+			--Check if the slide is complete
+			if panningSlideTarget then
+				if panningSlideRate > 0 then --Slide up
+					if nextPanning >= panningSlideTarget then
+						nextPanning = panningSlideTarget
+						channelData.panningSlideRate = false
+						channelData.panningSlideTarget = false
+					end
+				else --Slide down
+					if nextPanning <= panningSlideTarget then
+						nextPanning = panningSlideTarget
+						channelData.panningSlideRate = false
+						channelData.panningSlideTarget = false
+					end
+				end
+			end
+
+			--Clamp the panning value just in-case
+			nextPanning = min(max(-1, nextPanning), 1)
+
+			channelData.panning = nextPanning
+		end
+
+		--Amplitude update--
+		
+		if amplitudeSlideRate then
+			local nextAmplitude = channelData.amplitude + amplitudeSlideRate
+
+			--Check if the slide is complete
+			if amplitudeSlideTarget then
+				if amplitudeSlideRate > 0 then --Slide up
+					if nextAmplitude >= amplitudeSlideTarget then
+						nextAmplitude = amplitudeSlideTarget
+						channelData.amplitudeSlideRate = false
+						channelData.amplitudeSlideTarget = false
+					end
+				else --Slide down
+					if nextAmplitude <= amplitudeSlideTarget then
+						nextAmplitude = amplitudeSlideTarget
+						channelData.amplitudeSlideRate = false
+						channelData.amplitudeSlideTarget = false
+					end
+				end
+			end
+
+			--Clamp the amplitude value just in-case
+			nextAmplitude = min(max(0, nextAmplitude), 1)
+
+			channelData.amplitude = nextAmplitude
+		end
+
+		--Frequency update--
+
+		if frequencySlideRate then
+			local nextFrequency = channelData.frequency + frequencySlideRate
+
+			--Check if the slide is complete
+			if frequencySlideTarget then
+				if frequencySlideRate > 0 then --Slide up
+					if nextFrequency >= frequencySlideTarget then
+						nextFrequency = frequencySlideTarget
+						channelData.frequencySlideRate = false
+						channelData.frequencySlideTarget = false
+					end
+				else --Slide down
+					if nextFrequency <= frequencySlideTarget then
+						nextFrequency = frequencySlideTarget
+						channelData.frequencySlideRate = false
+						channelData.frequencySlideTarget = false
+					end
+				end
+			end
+
+			--Clamp the frequency value just in-case
+			nextFrequency = min(max(0, nextFrequency), 20000)
+
+			channelData.frequency = nextFrequency
+			channelData.periodStep = channelData.frequency/sampleRate
+		end
+	end
+
 	if channelData.wait then
 		local command = inChannel:peek()
 		if command and command[1] == "interrupt" then --Check if there is an interrupt
@@ -111,7 +198,7 @@ local function nextParameters(channelID)
 		while command do
 			local action = command[1]
 
-			print("Command", command[1], command[2])
+			print("Command", command[1], command[2], command[3])
 
 			if action == "enable" then
 				channelData.enabled = true
@@ -165,91 +252,6 @@ local function nextParameters(channelID)
 	--==Parameters update==--
 
 	if not enabled then return 0, false, -1, 0, 0 end
-
-	--Panning update--
-
-	if panningSlideRate then
-		local nextPanning = channelData.panning + panningSlideRate
-
-		--Check if the slide is complete
-		if panningSlideTarget then
-			if panningSlideRate > 0 then --Slide up
-				if nextPanning >= panningSlideTarget then
-					nextPanning = panningSlideTarget
-					channelData.panningSlideRate = false
-					channelData.panningSlideTarget = false
-				end
-			else --Slide down
-				if nextPanning <= panningSlideTarget then
-					nextPanning = panningSlideTarget
-					channelData.panningSlideRate = false
-					channelData.panningSlideTarget = false
-				end
-			end
-		end
-
-		--Clamp the panning value just in-case
-		nextPanning = min(max(-1, nextPanning), 1)
-
-		channelData.panning = nextPanning
-	end
-
-	--Amplitude update--
-	
-	if amplitudeSlideRate then
-		local nextAmplitude = channelData.amplitude + amplitudeSlideRate
-
-		--Check if the slide is complete
-		if amplitudeSlideTarget then
-			if amplitudeSlideRate > 0 then --Slide up
-				if nextAmplitude >= amplitudeSlideTarget then
-					nextAmplitude = amplitudeSlideTarget
-					channelData.amplitudeSlideRate = false
-					channelData.amplitudeSlideTarget = false
-				end
-			else --Slide down
-				if nextAmplitude <= amplitudeSlideTarget then
-					nextAmplitude = amplitudeSlideTarget
-					channelData.amplitudeSlideRate = false
-					channelData.amplitudeSlideTarget = false
-				end
-			end
-		end
-
-		--Clamp the amplitude value just in-case
-		nextAmplitude = min(max(0, nextAmplitude), 1)
-
-		channelData.amplitude = nextAmplitude
-	end
-
-	--Frequency update--
-
-	if frequencySlideRate then
-		local nextFrequency = channelData.frequency + frequencySlideRate
-
-		--Check if the slide is complete
-		if frequencySlideTarget then
-			if frequencySlideRate > 0 then --Slide up
-				if nextFrequency >= frequencySlideTarget then
-					nextFrequency = frequencySlideTarget
-					channelData.frequencySlideRate = false
-					channelData.frequencySlideTarget = false
-				end
-			else --Slide down
-				if nextFrequency <= frequencySlideTarget then
-					nextFrequency = frequencySlideTarget
-					channelData.frequencySlideRate = false
-					channelData.frequencySlideTarget = false
-				end
-			end
-		end
-
-		--Clamp the frequency value just in-case
-		nextFrequency = min(max(0, nextFrequency), 20000)
-
-		channelData.frequency = nextFrequency
-		channelData.periodStep = channelData.frequency/sampleRate
-	end
 
 	--Pariod update--
 
