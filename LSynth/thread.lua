@@ -57,6 +57,9 @@ for i=0, channels-1 do
 		periodStep = 1/(sampleRate/440), --The period step between each sample for the current frequency
 		reset = true, --Whether the period has been reset this sample or not
 
+		panningSlideRate = false, --(Number/false) The step to add to the amplitude each second inorder to reach the target
+		panningSlideTarget = false, --(Number/false) The target amplitude of the slide
+
 		amplitudeSlideRate = false, --(Number/false) The step to add to the amplitude each second inorder to reach the target
 		amplitudeSlideTarget = false, --(Number/false) The target amplitude of the slide
 
@@ -81,6 +84,9 @@ local function nextParameters(channelID)
 	local amplitude = channelData.amplitude
 	local period = channelData.period
 	local reset = channelData.reset
+
+	local panningSlideRate = channelData.panningSlideRate
+	local panningSlideTarget = channelData.panningSlideTarget
 
 	local amplitudeSlideRate = channelData.amplitudeSlideRate
 	local amplitudeSlideTarget = channelData.amplitudeSlideTarget
@@ -132,7 +138,17 @@ local function nextParameters(channelID)
 			elseif action == "waveform" then
 				channelData.waveform = command[2]
 			elseif action == "panning" then
-				channelData.panning = command[2]
+				if command[3] then --Force set the panning without a slide
+					channelData.panning = command[2]
+				else
+					--Automatically slide into the new panning during 2 milliseconds
+					--value/0.002 == value*500 (/0.002 -> / 2/1000 -> * 1000/2 -> * 500)
+					channelData.panningSlideTarget = command[2]
+					channelData.panningSlideRate = ((command[2] - channelData.panning) * 500)/sampleRate
+				end
+			elseif action == "panningSlide" then
+				channelData.panningSlideRate = command[2] and command[2]/sampleRate or false
+				channelData.panningSlideTarget = command[3] or false
 			elseif action == "wait" then
 				channelData.wait = command[2]*sampleRate
 				break
@@ -149,6 +165,34 @@ local function nextParameters(channelID)
 	--==Parameters update==--
 
 	if not enabled then return 0, false, -1, 0, 0 end
+
+	--Panning update--
+
+	if panningSlideRate then
+		local nextPanning = channelData.panning + panningSlideRate
+
+		--Check if the slide is complete
+		if panningSlideTarget then
+			if panningSlideRate > 0 then --Slide up
+				if nextPanning >= panningSlideTarget then
+					nextPanning = panningSlideTarget
+					channelData.panningSlideRate = false
+					channelData.panningSlideTarget = false
+				end
+			else --Slide down
+				if nextPanning <= panningSlideTarget then
+					nextPanning = panningSlideTarget
+					channelData.panningSlideRate = false
+					channelData.panningSlideTarget = false
+				end
+			end
+		end
+
+		--Clamp the panning value just in-case
+		nextPanning = min(max(-1, nextPanning), 1)
+
+		channelData.panning = nextPanning
+	end
 
 	--Amplitude update--
 	

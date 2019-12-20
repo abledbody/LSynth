@@ -82,9 +82,19 @@ function LSynth:setWaveform(channel, waveform)
 	return self.outChannels[channel]:push({"waveform", waveform})
 end
 
+--Force set the panning of a channel
+function LSynth:forceSetPanning(channel, panning)
+	return self.outChannels[channel]:push({"panning", panning, true})
+end
+
 --Set the panning of a channel
 function LSynth:setPanning(channel, panning)
 	return self.outChannels[channel]:push({"panning", panning})
+end
+
+--Set a panning slide effect for a channel
+function LSynth:setPanningSlide(channel, stepPerSecond, target)
+	return self.outChannels[channel]:push({"panningSlide", stepPerSecond, target})
 end
 
 --Set the frequency of a channel
