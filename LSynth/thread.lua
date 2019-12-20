@@ -60,6 +60,9 @@ for i=0, channels-1 do
 		amplitudeSlideRate = false, --(Number/false) The step to add to the amplitude each second inorder to reach the target
 		amplitudeSlideTarget = false, --(Number/false) The target amplitude of the slide
 
+		frequencySlideRate = false, --(Number/false) The step to add to the frequency each second inorder to reach the target
+		frequencySlideTarget = false, --(Number/false) The target frequency of the slide
+
 		wait = false --How many sample to wait before applying further commands
 	}
 end
@@ -81,6 +84,9 @@ local function nextParameters(channelID)
 
 	local amplitudeSlideRate = channelData.amplitudeSlideRate
 	local amplitudeSlideTarget = channelData.amplitudeSlideTarget
+
+	local frequencySlideRate = channelData.frequencySlideRate
+	local frequencySlideTarget = channelData.frequencySlideTarget
 
 	local inChannel = inChannels[channelID]
 
@@ -108,6 +114,9 @@ local function nextParameters(channelID)
 			elseif action == "frequency" then
 				channelData.frequency = command[2]
 				channelData.periodStep = channelData.frequency/sampleRate --1/(sampleRate/channelData.frequency)
+			elseif action == "frequencySlide" then
+				channelData.frequencySlideRate = command[2] and command[2]/sampleRate or false
+				channelData.frequencySlideTarget = command[3] or false
 			elseif action == "amplitude" then
 				if command[3] then --Force set the amplitude without a slide
 					channelData.amplitude = command[2]
@@ -167,6 +176,34 @@ local function nextParameters(channelID)
 		nextAmplitude = min(max(0, nextAmplitude), 1)
 
 		channelData.amplitude = nextAmplitude
+	end
+
+	--Frequency update--
+
+	if frequencySlideRate then
+		local nextFrequency = channelData.frequency + frequencySlideRate
+
+		--Check if the slide is complete
+		if frequencySlideTarget then
+			if frequencySlideRate > 0 then --Slide up
+				if nextFrequency >= frequencySlideTarget then
+					nextFrequency = frequencySlideTarget
+					channelData.frequencySlideRate = false
+					channelData.frequencySlideTarget = false
+				end
+			else --Slide down
+				if nextFrequency <= frequencySlideTarget then
+					nextFrequency = frequencySlideTarget
+					channelData.frequencySlideRate = false
+					channelData.frequencySlideTarget = false
+				end
+			end
+		end
+
+		--Clamp the frequency value just in-case
+		nextFrequency = min(max(0, nextFrequency), 20000)
+
+		channelData.frequency = nextFrequency
 	end
 
 	--Pariod update--
