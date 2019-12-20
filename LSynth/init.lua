@@ -92,9 +92,19 @@ function LSynth:setFrequency(channel, frequency)
 	return self.outChannels[channel]:push({"frequency", frequency})
 end
 
+--Force set the amplitude of a channel
+function LSynth:forceSetAmplitude(channel, amplitude)
+	return self.outChannels[channel]:push({"amplitude", amplitude, true})
+end
+
 --Set the amplitude of a channel
 function LSynth:setAmplitude(channel, amplitude)
 	return self.outChannels[channel]:push({"amplitude", amplitude})
+end
+
+--Set an amplitude slide effect for a channel
+function LSynth:setAmplitudeSlide(channel, stepPerSecond, target)
+	return self.outChannels[channel]:push({"amplitudeSlide", stepPerSecond, target})
 end
 
 --Enable a channel's output

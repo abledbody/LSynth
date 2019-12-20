@@ -57,6 +57,9 @@ for i=0, channels-1 do
 		periodStep = 1/(sampleRate/440), --The period step between each sample for the current frequency
 		reset = true, --Whether the period has been reset this sample or not
 
+		amplitudeSlideRate = false, --(Number/false) The step to add to the amplitude each second inorder to reach the target
+		amplitudeSlideTarget = false, --(Number/false) The target amplitude of the slide
+
 		wait = false --How many sample to wait before applying further commands
 	}
 end
@@ -75,6 +78,9 @@ local function nextParameters(channelID)
 	local amplitude = channelData.amplitude
 	local period = channelData.period
 	local reset = channelData.reset
+
+	local amplitudeSlideRate = channelData.amplitudeSlideRate
+	local amplitudeSlideTarget = channelData.amplitudeSlideTarget
 
 	local inChannel = inChannels[channelID]
 
@@ -103,7 +109,17 @@ local function nextParameters(channelID)
 				channelData.frequency = command[2]
 				channelData.periodStep = channelData.frequency/sampleRate --1/(sampleRate/channelData.frequency)
 			elseif action == "amplitude" then
-				channelData.amplitude = command[2]
+				if command[3] then --Force set the amplitude without a slide
+					channelData.amplitude = command[2]
+				else
+					--Automatically slide into the new amplitude during 2 milliseconds
+					--value/0.002 == value*500 (/0.002 -> / 2/1000 -> * 1000/2 -> * 500)
+					channelData.amplitudeSlideTarget = command[2]
+					channelData.amplitudeSlideRate = ((command[2] - channelData.amplitude) * 500)/sampleRate
+				end
+			elseif action == "amplitudeSlide" then
+				channelData.amplitudeSlideRate = command[2] and command[2]/sampleRate or false
+				channelData.amplitudeSlideTarget = command[3] or false
 			elseif action == "waveform" then
 				channelData.waveform = command[2]
 			elseif action == "panning" then
@@ -121,7 +137,38 @@ local function nextParameters(channelID)
 		end
 	end
 
+	--==Parameters update==--
+
 	if not enabled then return 0, false, -1, 0, 0 end
+
+	--Amplitude update--
+	
+	if amplitudeSlideRate then
+		local nextAmplitude = channelData.amplitude + amplitudeSlideRate
+
+		--Check if the slide is complete
+		if amplitudeSlideTarget then
+			if amplitudeSlideRate > 0 then --Slide up
+				if nextAmplitude >= amplitudeSlideTarget then
+					nextAmplitude = amplitudeSlideTarget
+					channelData.amplitudeSlideRate = false
+					channelData.amplitudeSlideTarget = false
+				end
+			else --Slide down
+				if nextAmplitude <= amplitudeSlideTarget then
+					nextAmplitude = amplitudeSlideTarget
+					channelData.amplitudeSlideRate = false
+					channelData.amplitudeSlideTarget = false
+				end
+			end
+		else --Clamp the amplitude value just in case
+			nextAmplitude = min(max(0, nextAmplitude), 1)
+		end
+
+		channelData.amplitude = nextAmplitude
+	end
+
+	--Pariod update--
 
 	channelData.reset = false
 
