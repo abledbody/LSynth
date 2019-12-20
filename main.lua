@@ -25,6 +25,7 @@ function love.update(dt)
 			LSynth:setFrequency(0, 250 + i*10)
 			LSynth:setPanning(0, i%3-1)
 		end
+
 	elseif LSynth.initialized and not love.keyboard.isDown("space") then
 		love.event.quit()
 	end
@@ -33,6 +34,11 @@ end
 function love.keypressed(key,isrepeat)
 	if key == "escape" then
 		love.event.quit()
+	elseif key == "m" then --Mute
+		for i=0, LSynth.channels-1 do
+			LSynth:interrupt(i)
+			LSynth:setAmplitude(i, 0)
+		end
 	end
 end
 
