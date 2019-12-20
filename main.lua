@@ -15,15 +15,18 @@ function love.update(dt)
 	if love.keyboard.isDown("space") and not LSynth.initialized then
 		LSynth:initialize(2)
 
-		LSynth:setPanning(0, 0)
+		LSynth:forceSetPanning(0, -1)
 		LSynth:setAmplitude(0, 1)
-		LSynth:setFrequency(0, 200)
-		LSynth:setFrequencySlide(0, 100, 20000)
-		LSynth:setWaveform(0,0)
+		LSynth:setFrequency(0, 20)
+		LSynth:setFrequencySlide(0, 100, 500)
+		LSynth:setWaveform(0,2)
 		LSynth:enable(0)
+		local speed = 4
 		for i=0, 200 do
-			LSynth:wait(0,0.125)
-			LSynth:setPanning(0, i%3-1)
+			LSynth:setPanningSlide(0, 1*speed, 1)
+			LSynth:wait(0,2/speed)
+			LSynth:setPanningSlide(0, -1*speed, -1)
+			LSynth:wait(0,2/speed)
 		end
 
 	elseif LSynth.initialized and not love.keyboard.isDown("space") then
