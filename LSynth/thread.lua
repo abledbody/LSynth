@@ -70,7 +70,66 @@ for i=0, channels-1 do
 	}
 end
 
+
+
 --== Parameters Controller ==--
+
+local actions = {}
+
+actions.enable = function(channelData)
+	channelData.enabled = true
+end
+actions.disable = function(channelData)
+	channelData.enabled = false
+end
+actions.frequency = function(channelData, value)
+	channelData.frequency = value
+	channelData.periodStep = channelData.frequency/sampleRate --1/(sampleRate/channelData.frequency)
+end
+actions.frequencySlide = function(channelData, value, target)
+	channelData.frequencySlideRate = value and value/sampleRate or false
+	channelData.frequencySlideTarget = target or false
+end
+actions.amplitude = function(channelData, value, force)
+	if force then --Force set the amplitude without a slide
+		channelData.amplitude = value
+	else
+		--Automatically slide into the new amplitude during 2 milliseconds
+		--value/0.002 == value*500 (/0.002 -> / 2/1000 -> * 1000/2 -> * 500)
+		channelData.amplitudeSlideTarget = value
+		channelData.amplitudeSlideRate = ((value - channelData.amplitude) * 500)/sampleRate
+	end
+end
+actions.amplitudeSlide = function(channelData, value, target)
+	channelData.amplitudeSlideRate = value and value/sampleRate or false
+	channelData.amplitudeSlideTarget = target or false
+end
+actions.waveform = function(channelData, value)
+	channelData.waveform = value
+end
+actions.panning = function(channelData, value, force)
+	if force then --Force set the panning without a slide
+		channelData.panning = value
+	else
+		--Automatically slide into the new panning during 2 milliseconds
+		--value/0.002 == value*500 (/0.002 -> / 2/1000 -> * 1000/2 -> * 500)
+		channelData.panningSlideTarget = value
+		channelData.panningSlideRate = ((value - channelData.panning) * 500)/sampleRate
+	end
+end
+actions.panningSlide = function(channelData, value, target)
+	channelData.panningSlideRate = value and value/sampleRate or false
+	channelData.panningSlideTarget = target or false
+end
+actions.wait = function(channelData, value)
+	channelData.wait = value*sampleRate
+	return true
+end
+actions.enableAndWait = function(channelData, value)
+	channelData.enabled = true
+	channelData.wait = value*sampleRate
+	return true
+end
 
 --Return the parameters for the next sample to generate.
 --Parameters: The chunnel ID.
@@ -196,54 +255,12 @@ local function nextParameters(channelID)
 	if not channelData.wait then --Execute further commands
 		local command = inChannel:pop()
 		while command do
-			local action = command[1]
+			local action, value, other = command[1], command[2], command[3]
 
-			print("Command", command[1], command[2], command[3])
+			print("Command", action, value, other)
 
-			if action == "enable" then
-				channelData.enabled = true
-			elseif action == "disable" then
-				channelData.enabled = false
-			elseif action == "frequency" then
-				channelData.frequency = command[2]
-				channelData.periodStep = channelData.frequency/sampleRate --1/(sampleRate/channelData.frequency)
-			elseif action == "frequencySlide" then
-				channelData.frequencySlideRate = command[2] and command[2]/sampleRate or false
-				channelData.frequencySlideTarget = command[3] or false
-			elseif action == "amplitude" then
-				if command[3] then --Force set the amplitude without a slide
-					channelData.amplitude = command[2]
-				else
-					--Automatically slide into the new amplitude during 2 milliseconds
-					--value/0.002 == value*500 (/0.002 -> / 2/1000 -> * 1000/2 -> * 500)
-					channelData.amplitudeSlideTarget = command[2]
-					channelData.amplitudeSlideRate = ((command[2] - channelData.amplitude) * 500)/sampleRate
-				end
-			elseif action == "amplitudeSlide" then
-				channelData.amplitudeSlideRate = command[2] and command[2]/sampleRate or false
-				channelData.amplitudeSlideTarget = command[3] or false
-			elseif action == "waveform" then
-				channelData.waveform = command[2]
-			elseif action == "panning" then
-				if command[3] then --Force set the panning without a slide
-					channelData.panning = command[2]
-				else
-					--Automatically slide into the new panning during 2 milliseconds
-					--value/0.002 == value*500 (/0.002 -> / 2/1000 -> * 1000/2 -> * 500)
-					channelData.panningSlideTarget = command[2]
-					channelData.panningSlideRate = ((command[2] - channelData.panning) * 500)/sampleRate
-				end
-			elseif action == "panningSlide" then
-				channelData.panningSlideRate = command[2] and command[2]/sampleRate or false
-				channelData.panningSlideTarget = command[3] or false
-			elseif action == "wait" then
-				channelData.wait = command[2]*sampleRate
-				break
-			elseif action == "enableAndWait" then
-				channelData.enabled = true
-				channelData.wait = command[2]*sampleRate
-				break
-			end
+			local actionFunc = actions[action]
+			if actionFunc and actionFunc(channelData, value, other) then break end
 
 			command = inChannel:pop()
 		end
