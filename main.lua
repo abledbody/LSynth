@@ -1,6 +1,8 @@
 --LSynth Demo
 local LSynth = require("LSynth")
 
+local speed = 4
+
 function love.load()
 	
 end
@@ -9,11 +11,19 @@ function love.draw()
 
 end
 
+function moreData()
+	LSynth:setPanningSlide(0, 1*speed, 1)
+	LSynth:wait(0,2/speed)
+	LSynth:request(0)
+	LSynth:setPanningSlide(0, -1*speed, -1)
+	LSynth:wait(0,2/speed)
+end
+
 function love.update(dt)
 	if LSynth.initialized then LSynth:update(dt) end
 
 	if love.keyboard.isDown("space") and not LSynth.initialized then
-		LSynth:initialize(2)
+		LSynth:initialize(moreData, 2)
 
 		LSynth:forceSetPanning(0, -1)
 		LSynth:setAmplitude(0, 1)
@@ -21,13 +31,8 @@ function love.update(dt)
 		LSynth:setFrequencySlide(0, 100, 500)
 		LSynth:setWaveform(0,2)
 		LSynth:enable(0)
-		local speed = 4
-		for i=0, 200 do
-			LSynth:setPanningSlide(0, 1*speed, 1)
-			LSynth:wait(0,2/speed)
-			LSynth:setPanningSlide(0, -1*speed, -1)
-			LSynth:wait(0,2/speed)
-		end
+		
+		moreData()
 
 	elseif LSynth.initialized and not love.keyboard.isDown("space") then
 		love.event.quit()
