@@ -271,10 +271,8 @@ local function nextParameters(channelID)
 
 			local actionFunc = actions[action]
 			local waiting = false
-			if actionFunc then
-				waiting = actionFunc(channelData, value, other)
-				if waiting then break end
-			end
+			if actionFunc 
+				and actionFunc(channelData, value, other) then break end
 
 			command = inChannel:pop()
 		end
